@@ -14,6 +14,17 @@ const useAssets = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const limit = 10;
 
+    const updateAsset = async (id, data) => {
+        try {
+            const response = await axiosSecure.patch(`/assets/${id}`, data);
+            refetch(); 
+            return { success: true, asset: response.data.asset };
+        } catch (err) {
+            console.error("Asset update failed:", err);
+            return { success: false, error: err.response?.data?.message || 'Failed to update asset' };
+        }
+    };
+
     const fetchAssets = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -66,6 +77,7 @@ const useAssets = () => {
         handlePageChange,
         handleSearchChange,
         refetch,
+        updateAsset,
     };
 };
 
