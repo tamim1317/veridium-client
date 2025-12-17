@@ -1,12 +1,26 @@
-import './App.css'
+import React from 'react';
+import { RouterProvider } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
+import router from './routes/Router';
+import { AuthProvider } from './context/AuthContext';
 
-function App() {
+const queryClient = new QueryClient();
 
-  return (
-    <>
-      <h1>Hello! I am here.</h1>
-    </>
-  )
-}
+const App = () => {
+    return (
+        <QueryClientProvider client={queryClient}>
 
-export default App
+            <AuthProvider>
+
+                <RouterProvider router={router} />
+
+                <Toaster />
+                
+            </AuthProvider>
+            
+        </QueryClientProvider>
+    );
+};
+
+export default App;

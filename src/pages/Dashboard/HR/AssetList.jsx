@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import useAssets from '../../../hooks/useAssets';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
-import EditAssetModal from '../../../components/Dashboard/EditAssetModal'; // Adjust path
+import EditAssetModal from '../../../pages/Dashboard/EditAssetModal';
 
 const AssetList = () => {
     const { 

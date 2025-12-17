@@ -1,6 +1,6 @@
 import React from 'react';
 
-const EmployeeRegister = () => {
+const ProtectedRoute = () => {
     return (
         <div>
             
@@ -8,4 +8,4 @@ const EmployeeRegister = () => {
     );
 };
 
-export default EmployeeRegister;
+export default ProtectedRoute;
