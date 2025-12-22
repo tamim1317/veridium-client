@@ -45,7 +45,7 @@ const HrRegister = () => {
       const result = await createUser(data.email, data.password);
       await updateUserProfile(data.name, logoUrl);
 
-      // 3. Save to Backend
+      // 3. Save to Backend (use VITE_API_URL for production)
       const hrInfo = {
         uid: result.user.uid,
         name: data.name,
