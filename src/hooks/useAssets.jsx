@@ -14,6 +14,19 @@ const useAssets = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const limit = 10;
 
+    const addAsset = async (assetData) => {
+        try {
+        const response = await axiosSecure.post('/assets', assetData);
+        refetch(); // Refresh list after adding
+        return { success: true, data: response.data };
+       } catch (err) {
+        return { 
+            success: false, 
+            error: err.response?.data?.message || 'Failed to add asset' 
+          };
+      }
+  };
+
     const updateAsset = async (id, data) => {
         try {
             const response = await axiosSecure.patch(`/assets/${id}`, data);
@@ -78,6 +91,7 @@ const useAssets = () => {
         handleSearchChange,
         refetch,
         updateAsset,
+        addAsset,
     };
 };
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import useAxiosSecure from './useAxiosSecure'; 
+import toast from 'react-hot-toast';
 
 const useEmployees = () => {
     const axiosSecure = useAxiosSecure();
@@ -7,7 +8,7 @@ const useEmployees = () => {
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [packageInfo, setPackageInfo] = useState({ currentEmployees: 0, packageLimit: 0 });
+    const [packageInfo, setPackageInfo] = useState({ currentCount: 0, limit: 0 });
 
     const fetchEmployees = useCallback(async () => {
         setLoading(true);
@@ -16,10 +17,10 @@ const useEmployees = () => {
         try {
             const response = await axiosSecure.get('/employees/affiliated'); 
 
-            setEmployees(response.data.employees);
+            setEmployees(response.data.employees || []);
             setPackageInfo({
-                currentEmployees: response.data.currentEmployees,
-                packageLimit: response.data.packageLimit,
+                currentCount: response.data.currentEmployees || 0,
+                limit: response.data.packageLimit || 0,
             });
             
         } catch (err) {
@@ -35,20 +36,37 @@ const useEmployees = () => {
         fetchEmployees();
     }, [fetchEmployees]);
     
-    // --- Remove Employee Logic ---
-    const removeEmployee = async (employeeEmail, employeeName) => {
-        try {
-            const res = await axiosSecure.patch(`/employees/remove`, { employeeEmail });
+    // --- ADD TO TEAM LOGIC (New for Audit) ---
+    const addToTeam = async (employeeId) => {
+        // Preventive check before hitting the server
+        if (packageInfo.currentCount >= packageInfo.limit) {
+            toast.error("Package limit reached! Please upgrade your plan.");
+            return { success: false, limitReached: true };
+        }
 
-            fetchEmployees();
-            return { success: true, message: res.data.message };
-            
+        try {
+            const res = await axiosSecure.patch(`/employees/add-to-team`, { employeeId });
+            toast.success("Employee added to your team!");
+            fetchEmployees(); // Refresh counts and list
+            return { success: true };
         } catch (err) {
-            console.error(`Failed to remove ${employeeName}:`, err);
-            return { success: false, message: err.response?.data?.message || `Failed to remove ${employeeName}.` };
+            toast.error(err.response?.data?.message || "Failed to add employee");
+            return { success: false };
         }
     };
-    // ----------------------------------------------------
+
+    // --- Remove Employee Logic ---
+    const removeEmployee = async (employeeEmail) => {
+        try {
+            const res = await axiosSecure.patch(`/employees/remove`, { employeeEmail });
+            toast.success("Employee removed from team.");
+            fetchEmployees();
+            return { success: true };
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to remove employee.");
+            return { success: false };
+        }
+    };
 
     return {
         employees,
@@ -57,6 +75,7 @@ const useEmployees = () => {
         packageInfo,
         fetchEmployees,
         removeEmployee,
+        addToTeam // Exported for the 'Add Employee' page
     };
 };
 

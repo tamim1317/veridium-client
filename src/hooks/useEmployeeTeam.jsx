@@ -1,32 +1,38 @@
 import { useState, useEffect, useCallback } from 'react';
 import useAxiosSecure from './useAxiosSecure'; 
+import { useAuth } from '../context/AuthContext';
 
 const useEmployeeTeam = () => {
     const axiosSecure = useAxiosSecure();
+    const { user } = useAuth();
     
     const [team, setTeam] = useState([]);
+    const [hrInfo, setHrInfo] = useState(null); // Added to store company/HR details
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const fetchTeam = useCallback(async () => {
+        if (!user?.email) return;
+
         setLoading(true);
         setError(null);
         
         try {
-            // Endpoint to get employees affiliated with the same HR manager
+            // Updated endpoint to get team members sharing the same HR
             const response = await axiosSecure.get('/employees/my-team'); 
 
-            // The API response should return an array of team members
-            setTeam(response.data.teamMembers);
+            // Assuming backend sends { team: [...], hr: { name, companyLogo, companyName } }
+            setTeam(response.data.team || []);
+            setHrInfo(response.data.hr || null);
             
         } catch (err) {
             console.error("Failed to fetch team list:", err);
-            setError(err.response?.data?.message || "Could not load team list.");
+            setError(err.response?.data?.message || "You are not currently affiliated with any team.");
             setTeam([]);
         } finally {
             setLoading(false);
         }
-    }, [axiosSecure]);
+    }, [axiosSecure, user?.email]);
 
     useEffect(() => {
         fetchTeam();
@@ -34,6 +40,7 @@ const useEmployeeTeam = () => {
 
     return {
         team,
+        hrInfo,
         loading,
         error,
         fetchTeam,

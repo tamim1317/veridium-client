@@ -1,46 +1,41 @@
-import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-
-const axiosSecure = axios.create({
-    baseURL: 'http://localhost:5000/api/v1', 
-});
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 const useAxiosSecure = () => {
-    const { logout, setToken, setUser } = useAuth();
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    axiosSecure.interceptors.request.use(
-        (config) => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
-            }
-            return config;
-        },
-        (error) => {
-            return Promise.reject(error);
-        }
-    );
+  const axiosSecure = axios.create({
+    baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
+  });
 
-    axiosSecure.interceptors.response.use(
-        (response) => {
-            return response;
-        },
-        async (error) => {
-            const status = error.response?.status;
-            
-            // If the error is 401 or 403
-            if (status === 401 || status === 403) {
-                console.log("Token expired or unauthorized access. Logging out...");
-                logout();
-                navigate('/login', { replace: true });
-            }
-            return Promise.reject(error);
-        }
-    );
+  // Add token to every request
+  axiosSecure.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem("access-token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
 
-    return axiosSecure;
+  // Handle 401/403 globally
+  axiosSecure.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem("access-token");
+        toast.error("Session expired. Please login again.", { duration: 4000 });
+        navigate("/login");
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  return axiosSecure;
 };
 
 export default useAxiosSecure;

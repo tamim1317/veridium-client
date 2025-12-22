@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import useAxiosSecure from './useAxiosSecure'; 
+import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const useAvailableAssets = () => {
     const axiosSecure = useAxiosSecure();
+    const { user } = useAuth();
     
     const [assets, setAssets] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -13,44 +16,59 @@ const useAvailableAssets = () => {
     const [assetTypeFilter, setAssetTypeFilter] = useState(''); // 'Returnable', 'Non-returnable', or ''
 
     const fetchAssets = useCallback(async () => {
+        if (!user?.email) return;
+        
         setLoading(true);
         setError(null);
         
         try {
-            // Employee endpoint to get available assets in their company
-            const url = `/assets/available-inventory?search=${searchTerm}&type=${assetTypeFilter}`;
+            // Updated URL to include filtering logic
+            const url = `/assets/available-inventory?search=${searchTerm}&type=${assetTypeFilter}&email=${user?.email}`;
             const response = await axiosSecure.get(url);
 
-            setAssets(response.data.availableAssets);
+            // Assuming backend returns { success: true, assets: [...] }
+            setAssets(response.data.assets || []);
             
         } catch (err) {
             console.error("Failed to fetch available assets:", err);
             setError(err.response?.data?.message || "Could not load available assets.");
-            setAssets([]);
         } finally {
             setLoading(false);
         }
-    }, [axiosSecure, searchTerm, assetTypeFilter]);
+    }, [axiosSecure, searchTerm, assetTypeFilter, user?.email]);
 
     useEffect(() => {
         fetchAssets();
     }, [fetchAssets]);
 
-    const submitRequest = async (assetId, assetName, quantity) => {
+    /**
+     * @param {Object} asset - The complete asset object
+     * @param {String} note - User provided note for the HR
+     */
+    const submitRequest = async (asset, note = "") => {
         try {
-            const res = await axiosSecure.post('/requests', {
-                assetId,
-                assetName,
-                quantityRequested: quantity,
-            });
+            const requestData = {
+                assetId: asset._id,
+                assetName: asset.productName,
+                assetType: asset.productType, // Essential for HR categorizing
+                requestNote: note,
+                requesterEmail: user?.email,
+                requesterName: user?.displayName,
+                requestDate: new Date().toISOString(),
+                status: 'Pending' // Initial status
+            };
+
+            const res = await axiosSecure.post('/requests', requestData);
             
-            // Refetch the list to update availability count (if applicable)
-            fetchAssets(); 
-            return { success: true, message: res.data.message };
-            
+            if (res.data.success) {
+                toast.success("Request submitted successfully!");
+                fetchAssets(); // Refresh inventory immediately
+                return { success: true };
+            }
         } catch (err) {
             const message = err.response?.data?.message || 'Failed to submit request.';
-            return { success: false, message: message };
+            toast.error(message);
+            return { success: false, message };
         }
     };
 
@@ -63,7 +81,7 @@ const useAvailableAssets = () => {
         setSearchTerm,
         setAssetTypeFilter,
         submitRequest,
-        fetchAssets
+        refetch: fetchAssets
     };
 };
 

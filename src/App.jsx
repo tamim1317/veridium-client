@@ -14,7 +14,6 @@ const App = () => {
             <AuthProvider>
 
                 <RouterProvider router={router} />
-
                 <Toaster />
                 
             </AuthProvider>

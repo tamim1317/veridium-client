@@ -1,16 +1,37 @@
-# React + Vite
+# Veridium | Asset Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Veridium is a powerful, high-performance Asset Management System designed for HR Managers and Employees. It streamlines the process of tracking company property, managing employee affiliations, and monitoring inventory stock with a professional, user-friendly interface.
 
-Currently, two official plugins are available:
+## Live Demo
+[Insert your Netlify/Vercel Link Here]
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech Stack
+- **Frontend:** React.js, Tailwind CSS, DaisyUI, TanStack Query
+- **Backend:** Node.js, Express.js, MongoDB
+- **Authentication:** Firebase Auth
+- **PDF Generation:** React-to-Print
+- **Notifications:** React Hot Toast, SweetAlert2
 
-## React Compiler
+## Key Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### For HR Managers
+- **Subscription Packages:** Choose between 5, 10, or 20 employee limits during registration.
+- **Asset Inventory:** Add, update, and track "Returnable" and "Non-returnable" items.
+- **Request Management:** Approve or reject asset requests with automated inventory adjustment.
+- **Analytics:** Visual dashboard charts showing requested vs. available items.
 
-## Expanding the ESLint configuration
+### For Employees
+- **Asset Requesting:** Search and request available company assets.
+- **My Assets:** Track assigned assets, view status, and return items.
+- **PDF Reports:** Generate and download official asset assignment reports.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Logic Highlights (Zero Tolerance Requirements)
+- **Inventory Control:** Assets are automatically deducted from stock upon HR approval and added back upon return.
+- **Affiliation Guard:** Employees cannot access company features until an HR Manager approves their affiliation.
+- **Package Enforcement:** HR Managers are blocked from adding more employees than their selected plan allows.
+
+## Installation & Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone (https://github.com/tamim1317/veridium-client.git)
